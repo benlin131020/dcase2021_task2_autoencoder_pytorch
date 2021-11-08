@@ -1,4 +1,4 @@
-# dcase2021_task2_mobilenetv2_pytorch
+# dcase2021_task2_autoencoder_pytorch
 ## Usage
 
 ### 1. Clone repository
