@@ -31,8 +31,8 @@ $ pip install -r requirements.txt
 ### 4. Run
 `CUDA_VISIBLE_DEVICES=1` 指定使用第幾顆 GPU
 ```
-$ CUDA_VISIBLE_DEVICES=1 python train -d
-$ CUDA_VISIBLE_DEVICES=1 python test -d
+$ CUDA_VISIBLE_DEVICES=1 python 00_train -d
+$ CUDA_VISIBLE_DEVICES=1 python 01_test -d
 ```
 
 ### 5. yaml 設定
