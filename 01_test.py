@@ -94,12 +94,13 @@ if __name__ == "__main__":
         model.eval()
 
         # load anomaly score distribution for determining threshold
-        score_distr_file_path = "{model}/score_distr_{machine_type}.pkl".format(model=param["model_directory"],
-                                                                    machine_type=machine_type)
-        shape_hat, loc_hat, scale_hat = joblib.load(score_distr_file_path)
+        # score_distr_file_path = "{model}/score_distr_{machine_type}.pkl".format(model=param["model_directory"],
+        #                                                             machine_type=machine_type)
+        # shape_hat, loc_hat, scale_hat = joblib.load(score_distr_file_path)
 
         # determine threshold for decision
-        decision_threshold = scipy.stats.gamma.ppf(q=param["decision_threshold"], a=shape_hat, loc=loc_hat, scale=scale_hat)
+        # decision_threshold = scipy.stats.gamma.ppf(q=param["decision_threshold"], a=shape_hat, loc=loc_hat, scale=scale_hat)
+        decision_threshold = 1
 
         if mode:
             # results for each machine type
@@ -139,7 +140,15 @@ if __name__ == "__main__":
                 y_pred = [0. for k in files]
                 for file_idx, file_path in tqdm(enumerate(files), total=len(files)):
                     try:
-                        data = com.file_to_vectors(file_path,
+                        if param["feature"]["linear"] == 0:
+                            data = com.file_to_vectors(file_path,
+                                                        n_mels=param["feature"]["n_mels"],
+                                                        n_frames=param["feature"]["n_frames"],
+                                                        n_fft=param["feature"]["n_fft"],
+                                                        hop_length=param["feature"]["hop_length"],
+                                                        power=param["feature"]["power"])
+                        else:
+                            data = com.file_to_vectors_linear(file_path,
                                                         n_mels=param["feature"]["n_mels"],
                                                         n_frames=param["feature"]["n_frames"],
                                                         n_fft=param["feature"]["n_fft"],

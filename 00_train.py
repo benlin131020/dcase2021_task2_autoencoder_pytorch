@@ -89,7 +89,8 @@ def file_list_to_data(file_list,
                       n_hop_frames=1,
                       n_fft=1024,
                       hop_length=512,
-                      power=2.0):
+                      power=2.0,
+                      linear=0):
     """
     convert the file_list to a vector array.
     file_to_vector_array() is iterated, and the output vector array is concatenated.
@@ -109,7 +110,15 @@ def file_list_to_data(file_list,
 
     # iterate file_to_vector_array()
     for idx in tqdm(range(len(file_list)), desc=msg):
-        vectors = com.file_to_vectors(file_list[idx],
+        if linear == 0:
+            vectors = com.file_to_vectors(file_list[idx],
+                                                n_mels=n_mels,
+                                                n_frames=n_frames,
+                                                n_fft=n_fft,
+                                                hop_length=hop_length,
+                                                power=power)
+        else:
+            vectors = com.file_to_vectors_linear(file_list[idx],
                                                 n_mels=n_mels,
                                                 n_frames=n_frames,
                                                 n_fft=n_fft,
@@ -193,13 +202,16 @@ if __name__ == "__main__":
                                  n_hop_frames=param["feature"]["n_hop_frames"],
                                  n_fft=param["feature"]["n_fft"],
                                  hop_length=param["feature"]["hop_length"],
-                                 power=param["feature"]["power"])
+                                 power=param["feature"]["power"],
+                                 linear=param["feature"]["linear"])
 
         # number of vectors for each wave file
         n_vectors_ea_file = int(data.shape[0] / len(files))
 
         training_data = dataloader_dcase.CustomDataset(data)
         train_dataloader = DataLoader(training_data, batch_size=param["fit"]["batch_size"], shuffle=True)
+        val_data = dataloader_dcase.CustomDataset(data)
+        val_dataloader = DataLoader(val_data, 1, shuffle=False)
 
         model = AutoEncoder(param["feature"]["n_mels"] * param["feature"]["n_frames"])
         model.to(device)
@@ -229,6 +241,21 @@ if __name__ == "__main__":
         torch.save(model.state_dict(), model_file_path)
         com.logger.info("save_model -> {}".format(model_file_path))
         print("============== END TRAINING ==============")
+
+        # calculate y_pred for fitting anomaly score distribution
+        # y_pred = []
+        # start_idx = 0
+        # model.eval()
+        # for step, x in enumerate(tqdm(val_dataloader)):
+        #     x = x.to(device=device, dtype=torch.float)
+        #     model_x = model(x).cpu().detach().numpy()
+        #     x = x.cpu().detach().numpy()
+        #     y_pred.append(np.mean(np.square(x - model_x)))
+
+        # # fit anomaly score distribution
+        # shape_hat, loc_hat, scale_hat = scipy.stats.gamma.fit(y_pred)
+        # gamma_params = [shape_hat, loc_hat, scale_hat]
+        # joblib.dump(gamma_params, score_distr_file_path)
 
         del data
         del model
