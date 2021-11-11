@@ -16,10 +16,14 @@ $ conda create -n myenv python=3.6
 ```
 $ conda activate myenv
 ```
-
 離開 Python 環境
 ```
 $ conda deactivate
+```
+如果 conda 版本較舊
+```
+$ source activate myenv
+$ source deactivate
 ```
 
 ### 3. 安裝 Python 套件
